@@ -99,8 +99,8 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     bytes4 private constant _INTERFACE_ID_ERC721_ENUMERABLE = 0x780e9d63;
 
     constructor (uint256 supply) public {
-        _name = "Property";
-        _symbol = "QST_TKN";
+        _name = "ROSHAMBO";
+        _symbol = "ROSH";
         total_supply[currentSeason] = supply;
         contractowner = msg.sender;
         _registerInterface(_INTERFACE_ID_ERC721);
