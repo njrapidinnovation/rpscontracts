@@ -390,17 +390,6 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
 
 
 
-   
-    function _mint(uint256 origVal,
-                                     address ownerAddress,
-                                     uint256 coins,
-                                     string memory property_images_hash,
-                                     string[] memory pro_add_details,
-                                     uint prop_tax,
-                                     uint prop_insurance,
-                                     uint prop_maintainence,
-                                     string memory features_prop) public override {}
-
     /**
      * @dev Destroys `tokenId`.
      * The approval is cleared when the token is burned.
