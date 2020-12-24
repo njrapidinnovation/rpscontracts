@@ -15,12 +15,13 @@ import "../EnumerableMap.sol";
 
 contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     
-     struct card {
+    struct card {
         uint256 cardtype; //1: Rock , 2: Paper, 3 : Scissors
         uint256 value;
         uint256 free; //0 for free 1 for purchased
     }
-  using SafeMath for uint256;
+    
+    using SafeMath for uint256;
     using Address for address;
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableMap for EnumerableMap.UintToAddressMap;
@@ -32,17 +33,24 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
     bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
+    
+    
+    
+    /*----------------------MAPPINGS START----------------------------*/
 
     // Mapping from holder address to their (enumerable) set of owned tokens
     mapping (address => EnumerableSet.UintSet) private _holderTokens;
     
+    //Mapping from currentSeason to card type to total supply of each tokens
+    mapping( uint256 => mapping(uint => uint)) public minted_supply_token;
+    
+    //Mapping from currentSeason to total supply of tokens
     mapping( uint256 => uint256) public total_supply;
     
+    //Mapping from currentSeason to no. of minted tokens
     mapping(uint256 => uint256) public minted_tokens;
-
-    // Enumerable mapping from token ids to their owners
-    EnumerableMap.UintToAddressMap private _tokenOwners;
     
+    //Mapping from currentSeason and token id to tokenowner address
     mapping(uint256 => mapping(uint256 => address)) public tokenOwners;
 
     // Mapping from token ID to approved address
@@ -51,42 +59,55 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     // Mapping from owner to operator approvals
     mapping (address => mapping (address => bool)) private _operatorApprovals;
     
-    
+    //Mapping from playerAddress to currentSeason to tokenid to card structure(cardtype,value,free)
     mapping(address => mapping(uint256 => mapping(uint256 => card)))
     public player;
 
+    //Mapping from playerAddress to currentSeason to cardtype(1,2,3) to no. of card of that type that it holds
     mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
     public playersTokenCount;
     
-    
+    //Mapping from playerAddress to currentSeason to array of cardids holded by player
     mapping(address => mapping(uint256 => uint256[])) public ownToken;
     
+    //Mapping from currentSeason to tokenid to approved player to spend the cards
     mapping(uint256 => mapping(uint256 => address)) public approval;
+    
+    // Optional mapping for token URIs
+    mapping (uint256 => string) private _tokenURIs;
+    
+    //Mapping from playerAddress to ccurrentSeason to a string(null@tokenid, "!", tokentype, "!", tokenvalue@tokenid, "!", tokentype, "!", tokenvalue)
+    mapping(address => mapping(uint256 => string)) allDetails;
 
+    /*----------------------MAPPINGS END----------------------------*/
+   
+    /*----------------------VARIABLES DECLARED----------------------------*/
+    
     // Token name
     string private _name;
 
     // Token symbol
     string private _symbol;
     
+    // Token ID
     uint256 public token_Id = 0;
 
-    //uint256 public totalCount =0;
+    //address of this contract owner
     address contractowner;
+    
+    //deployed address of game contract 
     address gameContractAddress;
+    
+    //current game season
     uint256 public currentSeason = 1;
+    
+    //deploed address of market contract
     address marketAddress;
     
-
-    // Optional mapping for token URIs
-    mapping (uint256 => string) private _tokenURIs;
+    EnumerableMap.UintToAddressMap private _tokenOwners;
     
-    mapping(address => mapping(uint256 => string)) allDetails;
-    
-    // Adding metaData to the property
-    
-    
-    
+    //set supply of each token
+    uint supply_of_each_token;
     
     // Base URI
     string private _baseURI;
@@ -98,23 +119,23 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     bytes4 private constant _INTERFACE_ID_ERC721_ENUMERABLE = 0x780e9d63;
 
     constructor (uint256 supply) public {
+        
         _name = "ROSHAMBO";
         _symbol = "ROSH";
         total_supply[currentSeason] = supply;
+        supply_of_each_token = supply/3; 
         contractowner = msg.sender;
         _registerInterface(_INTERFACE_ID_ERC721);
         _registerInterface(_INTERFACE_ID_ERC721_METADATA);
         _registerInterface(_INTERFACE_ID_ERC721_ENUMERABLE);
     }
     
-        modifier onlyOwner() {
+    modifier onlyOwner() {
         require(msg.sender == contractowner);
         _;
     }
     
-
-
-     function setGameContractAddress(address contractAddress) public payable {
+    function setGameContractAddress(address contractAddress) public payable {
         require(msg.sender == contractowner);
         gameContractAddress = contractAddress;
     }
@@ -136,11 +157,14 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         uint256 _value
     ) public payable returns (uint256) {
         /* It will create the token at contractowner address */
+    
+        
         require(minted_tokens[currentSeason]<total_supply[currentSeason]);
+        require(minted_supply_token[currentSeason][cardtype] < supply_of_each_token);    
         require(
             msg.sender == contractowner ||
-                msg.sender == gameContractAddress ||
-                msg.sender == marketAddress
+            msg.sender == gameContractAddress ||
+            msg.sender == marketAddress
         );
         
         player[playeraddress][currentSeason][++token_Id].cardtype = cardtype;
@@ -163,6 +187,7 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         emit Transfer(address(0),playeraddress,token_Id);
         tokenOwners[currentSeason][token_Id] = playeraddress;
         minted_tokens[currentSeason]++;
+        minted_supply_token[currentSeason][cardtype]++;
         return token_Id;
     }
     
@@ -206,8 +231,7 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
             return playersTokenCount[_address][currentSeason][typ];
         }
     }
-
-
+ 
 
     function balanceOf(address owner) public view override returns (uint256) {
         require(owner != address(0), "ERC721: balance query for the zero address");
