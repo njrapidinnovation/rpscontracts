@@ -13,115 +13,27 @@ var marketPlaceContractAddress = '0xa18C493221576c564dD38999D453Ed8a39CF85B8'
 //Game interface
 const interface = [
 	{
-		"constant": true,
 		"inputs": [],
-		"name": "stars",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "tokenID1",
-				"type": "uint256"
-			},
-			{
-				"name": "tokenID2",
-				"type": "uint256"
-			},
-			{
-				"name": "status",
-				"type": "bool"
-			}
-		],
-		"name": "clearTokens",
-		"outputs": [],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "nft_add",
-				"type": "address"
-			}
-		],
-		"name": "set_nft_address",
-		"outputs": [],
-		"payable": false,
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "constructor"
 	},
 	{
-		"constant": true,
 		"inputs": [],
-		"name": "value",
+		"name": "NoOfTokens",
 		"outputs": [
 			{
+				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
-		"payable": false,
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"constant": false,
 		"inputs": [
 			{
-				"name": "token_add",
-				"type": "address"
-			}
-		],
-		"name": "set_token_address",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "nft",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_value",
-				"type": "uint256"
-			}
-		],
-		"name": "setValue",
-		"outputs": [],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
+				"internalType": "address",
 				"name": "_of",
 				"type": "address"
 			}
@@ -129,240 +41,41 @@ const interface = [
 		"name": "TotalCards",
 		"outputs": [
 			{
+				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
-		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"constant": false,
 		"inputs": [
 			{
-				"name": "player1",
-				"type": "address"
-			},
-			{
-				"name": "player2",
-				"type": "address"
-			},
-			{
-				"name": "token1",
-				"type": "uint256"
-			},
-			{
-				"name": "token2",
-				"type": "uint256"
-			}
-		],
-		"name": "playGame",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
+				"internalType": "address",
 				"name": "_of",
 				"type": "address"
-			}
-		],
-		"name": "remainingScissor",
-		"outputs": [
+			},
 			{
-				"name": "",
+				"internalType": "uint256",
+				"name": "_count",
 				"type": "uint256"
 			}
 		],
-		"payable": false,
+		"name": "blockStars",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"constant": false,
 		"inputs": [
 			{
-				"name": "_of",
-				"type": "address"
-			}
-		],
-		"name": "remainingPaper",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "card1",
-				"type": "uint256"
-			},
-			{
-				"name": "card2",
-				"type": "uint256"
-			}
-		],
-		"name": "decide",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_stars",
-				"type": "uint256"
-			}
-		],
-		"name": "setStars",
-		"outputs": [],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_amount",
-				"type": "uint256"
-			}
-		],
-		"name": "setToken",
-		"outputs": [],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "_of",
-				"type": "address"
-			}
-		],
-		"name": "showStars",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "starCount",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "player",
-				"type": "address"
-			},
-			{
-				"name": "_amount",
-				"type": "uint256"
-			}
-		],
-		"name": "transferBack",
-		"outputs": [],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "player",
-				"type": "address"
-			}
-		],
-		"name": "signUp",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "NoOfTokens",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
+				"internalType": "address",
 				"name": "user",
 				"type": "address"
 			},
 			{
+				"internalType": "uint256",
 				"name": "tokenId",
 				"type": "uint256"
 			}
@@ -370,40 +83,149 @@ const interface = [
 		"name": "cardDetails",
 		"outputs": [
 			{
+				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			},
 			{
+				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
-		"payable": true,
 		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
-		"constant": false,
 		"inputs": [
 			{
-				"name": "_of",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "tokenID1",
+				"type": "uint256"
 			},
 			{
-				"name": "_count",
+				"internalType": "uint256",
+				"name": "tokenID2",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "clearTokens",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "card1",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "card2",
 				"type": "uint256"
 			}
 		],
-		"name": "blockStars",
-		"outputs": [],
-		"payable": false,
+		"name": "decide",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "nft",
+		"outputs": [
+			{
+				"internalType": "contract NFT",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "player1",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "player2",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "token1",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "token2",
+				"type": "uint256"
+			}
+		],
+		"name": "playGame",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_of",
+				"type": "address"
+			}
+		],
+		"name": "remainingPaper",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"constant": false,
 		"inputs": [
 			{
+				"internalType": "address",
 				"name": "_of",
 				"type": "address"
 			}
@@ -411,23 +233,195 @@ const interface = [
 		"name": "remainingRock",
 		"outputs": [
 			{
+				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
-		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"payable": false,
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_of",
+				"type": "address"
+			}
+		],
+		"name": "remainingScissor",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "nonpayable",
-		"type": "constructor"
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_stars",
+				"type": "uint256"
+			}
+		],
+		"name": "setStars",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "setToken",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_value",
+				"type": "uint256"
+			}
+		],
+		"name": "setValue",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "nft_add",
+				"type": "address"
+			}
+		],
+		"name": "set_nft_address",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token_add",
+				"type": "address"
+			}
+		],
+		"name": "set_token_address",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_of",
+				"type": "address"
+			}
+		],
+		"name": "showStars",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "player",
+				"type": "address"
+			}
+		],
+		"name": "signUp",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "starCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "stars",
+		"outputs": [
+			{
+				"internalType": "contract Interface_stars",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "player",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transferBack",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "value",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	}
 ]
 var _interface = new web3.eth.Contract((interface) , gameContractAddress); //deployed address 
-
 
 //NFT interface
 const interface_nft = [
@@ -1683,7 +1677,7 @@ var star = new web3.eth.Contract(interface_stars, starsContractAddress);
  
 //////////////////////////////////////////////////////////////////////////////////////////////////////////ACCOUNTS USED////////////
 
-const account1  = '0xC6EBFdb69A29D77EefdeaaeaB2288Ad2Ee86EEB8'
+const account1  = '0x114dF342f9649f66E3e670bA29418b4693Fe3dA3'
 const account2  = '0xF7C17c02428CcC44a35725DfDe473cCA2c4393ff'
 const account3  = '0xf158F22ec9ef60A64F83Cf2BD59F6b5554E9caC4'
 const account4 = '0x63580a35A6B6Da5c13c1Bf9c62C51FbCe64c806F';
@@ -1697,7 +1691,7 @@ const privateKey2 = new  Buffer.from('60d4a93d45c1b890b340db0fbc9ce48afedcee22f7
 const privateKey3 = new  Buffer.from('1d74031771cabab38b07d31937bdcf279c712f0e2f358c1072bc0cf27898e004' , 'hex');
 const privateKey4 = new Buffer.from('7958cb545ad3be8ad142a8f632c7c7cc5c8bc18bdd098f69998ee026e4fa525a' , 'hex');
 const privatekeymine = new Buffer.from('f8e9cf0d026ae4b1eb8b38c717ba090a37576dbfa9dbd51e0f2542e12c573e57' , 'hex');
-//const privatekeyhritik  = new Buffer.from('df41f70a767fce3d45fafe4b3b9cd5aa856ab304a17728c50ed99f43c7bac186' , 'hex');
+//const privatekeyhritik  = new Buffer.from('04b56c5fca80b232fe02c89c5645823a586e5cc996ce7988b814bb88c56bcdba' , 'hex');
 //////////////////////////////////////////////////////////transcation function for game////////////////////////////////////////////
 async function runCode(data , account , privateKey,  deployedAddress){
         
@@ -1705,7 +1699,6 @@ async function runCode(data , account , privateKey,  deployedAddress){
 
         var Price =  await web3.eth.getGasPrice();
         
-       
         var txData = {
 
                 nonce: web3.utils.toHex(count),
@@ -1721,7 +1714,9 @@ async function runCode(data , account , privateKey,  deployedAddress){
                 
                 data: data
         
-        };
+		};
+		
+		console.log(txData);
                 
         var run_code = new TX(txData, {'chain': 'rinkeby'});
         
@@ -1800,8 +1795,8 @@ async function setToken(_amount , account , privateKey , deployedAddress){   ///
 			try
 			{																//// , account, private key to be used for transaction and game contract addresss
 			var data = await _interface.methods.signUp(player).encodeABI(); 
-			await runCode(data , account , privateKey , deployedAddress); 
-			return 1
+			await runCode(data , account1 , privateKey1 , gameContractAddress); 
+			return 1;
 			}
 			catch(e)
 			{
@@ -2026,7 +2021,7 @@ async function approve(spender,value, account , privatekey,deployedAddress){
 }
 }
 
-var sign_up = async function(address,gameContractAddress) { return await signUP(address,account1,privateKey1,gameContractAddress); }
+var sign_up = async function(address,gameContractAddress) { return await signUP(address,account1,privateKey1,gameContractAddress);}
 var show_stars = async function(address) { return await showStars(address);}
 var total_cards = async function (address) { return await totalCards(address); }
 var returnownedTokens = async function(playerAddress) { return await returnOwnedToken(playerAddress) }
@@ -2070,5 +2065,11 @@ module.exports = {
 //  {
 //var d = createNewToken("0xFcb269E2798C48CF4B93aAeCDF8CEc143AcC29b4",3,40,account1,privateKey1,nftContractAddress);
 //   }
-returnOwnedToken("0xFcb269E2798C48CF4B93aAeCDF8CEc143AcC29b4");
+//sign_up("0xB52c61bd5cBE05DDF2d1C876856B99EEf4d8fA1c",gameContractAddress);
+//returnOwnedToken("0x114dF342f9649f66E3e670bA29418b4693Fe3dA3");
+//totalCards("0x114dF342f9649f66E3e670bA29418b4693Fe3dA3");
 //  console.log(show_stars("0xC6EBFdb69A29D77EefdeaaeaB2288Ad2Ee86EEB8"));
+//totalCards("0x114dF342f9649f66E3e670bA29418b4693Fe3dA3");
+//createNewToken("0x114dF342f9649f66E3e670bA29418b4693Fe3dA3",1,100,account1,privateKey1,nftContractAddress);
+
+sign_up("0x34e215b32eAB859bf5af710f6103FF076682f619",gameContractAddress);
