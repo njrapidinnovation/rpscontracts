@@ -2036,6 +2036,8 @@ var transferstar = async function(_to,value,account,gameContractAddress) { await
 var transferfrom = async function(_from,_to,value, gameContractAddress) {await TransferFrom(_from,_to,value , account2 , privateKey2 , gameContractAddress)}
 var burn = async function(tokenId,gameContractAddress) {  await burn(tokenId,account1,privateKey1,gameContractAddress)}
 var getalldetails = async function(address) { await getAllDetails(address) }
+var totalCards_ofeach = async function(address){ return await totalCards_ofeachtype(address); }
+
 // var _approve = async function(spender,value, account) { await approve(spender,value, account , privatekeyhritik,"0x0A27A7370D14281152f7393Ed6bE963C2019F5fe")}
 
 // transferstar(transferacc,1,account1,privateKey1,"0x0A27A7370D14281152f7393Ed6bE963C2019F5fe").then((data)=>{
@@ -2053,6 +2055,7 @@ module.exports = {
         sign_up:sign_up,
         show_stars:show_stars,
         total_cards:total_cards,
+        totalCards_ofeach:totalCards_ofeach,
 		returnownedTokens:returnownedTokens,
 		detailOfCard:detailOfCard,
 		ownerof:ownerof,
