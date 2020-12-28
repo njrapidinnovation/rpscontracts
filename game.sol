@@ -92,7 +92,7 @@ contract Game{
           nft.createToken(player, 3 ,value);  
         }
         
-      return  stars.transferFrom(owner ,  player ,starCount);
+      return  stars.transferFrom(owner,player ,starCount);
     
     }
     
