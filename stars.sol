@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.4.23;
-// import "SafeMath.sol";
+pragma solidity ^0.6.0;
 contract star{
     using SafeMath for uint256;
     string  public name = "Star";
@@ -32,6 +31,7 @@ constructor (uint256 _initialSupply,address _gameContractAddress) public {
         balances[msg.sender][currentSeason] = _initialSupply;
         gameContractAddress = _gameContractAddress;
         totalSupply=_initialSupply;
+        emit Transfer(address(0),msg.sender,_initialSupply);
     }
 function transfer(address _to, uint256 _value) public payable returns (bool success) {
         require(_value>0);
