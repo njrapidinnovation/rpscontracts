@@ -6,9 +6,9 @@ const Web3 = require('web3')
 var providerURL = "https://rinkeby.infura.io/v3/e72daeeafa5f4e8cae0110b45fed3645"
 const web3 = new Web3(new Web3.providers.HttpProvider(providerURL));
 
-var gameContractAddress = '0x3628552339b265c45D52809865326F2c5c4A8c39'
-var nftContractAddress = '0x38a7338Fb3D19a253566C22f75c057f82C085A3C'
-var starsContractAddress = '0x186ccb664c0f8683c07Bc80ebe1EB0fd5B336706'
+var gameContractAddress = '0x30cfe5F4cE8aEE1F97eb63B2D53C238b46201d81'
+var nftContractAddress = '0x351C44b5F2126dC4b7a242eAAfc485a49ACc3529'
+var starsContractAddress = '0xF7132c528a56d1f0032A11515bE54Da2aaA93500'
 var marketPlaceContractAddress = '0xa18C493221576c564dD38999D453Ed8a39CF85B8'
 //Game interface
 const interface = [
@@ -1677,7 +1677,7 @@ var star = new web3.eth.Contract(interface_stars, starsContractAddress);
  
 //////////////////////////////////////////////////////////////////////////////////////////////////////////ACCOUNTS USED////////////
 
-const account1  = '0x114dF342f9649f66E3e670bA29418b4693Fe3dA3'
+const account1  = '0x4D9293a4aD21F19655E82F155DC4B94f3aA80656'
 const account2  = '0xF7C17c02428CcC44a35725DfDe473cCA2c4393ff'
 const account3  = '0xf158F22ec9ef60A64F83Cf2BD59F6b5554E9caC4'
 const account4 = '0x63580a35A6B6Da5c13c1Bf9c62C51FbCe64c806F';
@@ -1686,7 +1686,7 @@ const transferacc = '0xFcb269E2798C48CF4B93aAeCDF8CEc143AcC29b4';
 
 
 
-const privateKey1 = new  Buffer.from('df41f70a767fce3d45fafe4b3b9cd5aa856ab304a17728c50ed99f43c7bac186' , 'hex');
+const privateKey1 = new  Buffer.from('9ef84cb36ee737460610dd8497c38c88a9ae49be477bd2aa207212aa85cdaaa4' , 'hex');
 const privateKey2 = new  Buffer.from('60d4a93d45c1b890b340db0fbc9ce48afedcee22f71433812828e5c8e8f7774c' , 'hex');
 const privateKey3 = new  Buffer.from('1d74031771cabab38b07d31937bdcf279c712f0e2f358c1072bc0cf27898e004' , 'hex');
 const privateKey4 = new Buffer.from('7958cb545ad3be8ad142a8f632c7c7cc5c8bc18bdd098f69998ee026e4fa525a' , 'hex');
@@ -2072,4 +2072,4 @@ module.exports = {
 //totalCards("0x114dF342f9649f66E3e670bA29418b4693Fe3dA3");
 //createNewToken("0x114dF342f9649f66E3e670bA29418b4693Fe3dA3",1,100,account1,privateKey1,nftContractAddress);
 
-sign_up("0x34e215b32eAB859bf5af710f6103FF076682f619",gameContractAddress);
+sign_up(account2,gameContractAddress);
