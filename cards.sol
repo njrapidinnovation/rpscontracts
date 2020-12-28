@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
 
-import "../Strings.sol";
+//import "../Strings.sol";
 import "../Context.sol";
 import "../IERC721Metadata.sol";
 import "../IERC721Enumerable.sol";
 import "../IERC721Receiver.sol";
 import "../ERC165.sol";
-import "../SafeMath.sol";
 import "../Address.sol";
 import "../EnumerableSet.sol";
 import "../EnumerableMap.sol";
@@ -21,11 +19,11 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         uint256 free; //0 for free 1 for purchased
     }
     
-    using SafeMath for uint256;
+    //using SafeMath for uint256;
     using Address for address;
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableMap for EnumerableMap.UintToAddressMap;
-    using Strings for uint256;
+    //using Strings for uint256;
     
     uint256 _id = 1;
 
@@ -177,9 +175,9 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         string memory tempVal = "";
         string memory tempTyp = "";
         string memory fnl = "";
-        tempTyp = cardtype.toString();
-        tempVal = _value.toString();
-        tempTok = token_Id.toString();
+        tempTyp = uinttoString(cardtype);
+        tempVal = uinttoString(_value);
+        tempTok = uinttoString(token_Id);
         fnl = string(abi.encodePacked(tempTok, "!", tempTyp, "!", tempVal));
         allDetails[playeraddress][currentSeason] = string(
             abi.encodePacked(allDetails[playeraddress][currentSeason], "@", fnl)
@@ -189,6 +187,29 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         minted_tokens[currentSeason]++;
         minted_supply_token[currentSeason][cardtype]++;
         return token_Id;
+    }
+    
+    function uinttoString(uint256 value) internal pure returns (string memory) {
+        // Inspired by OraclizeAPI's implementation - MIT licence
+        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        uint256 index = digits - 1;
+        temp = value;
+        while (temp != 0) {
+            buffer[index--] = byte(uint8(48 + temp % 10));
+            temp /= 10;
+        }
+        return string(buffer);
     }
     
      function returnAllDetails(address _user) public view returns (string memory) {
@@ -266,7 +287,7 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
             return string(abi.encodePacked(_baseURI, _tokenURI));
         }
         // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
-        return string(abi.encodePacked(_baseURI, tokenId.toString()));
+        return string(abi.encodePacked(_baseURI, uinttoString(tokenId)));
     }
 
     function baseURI() public view returns (string memory) {
