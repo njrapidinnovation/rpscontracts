@@ -148,6 +148,16 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         total_supply[currentSeason] =_supply;
     }
     
+    function SellerApproveMarket(address from , address spender , uint256 tokenId) public {
+        
+        require(msg.sender == marketAddress,"caller is not market");
+        address owner = ownerOf(tokenId);
+        require(spender != owner, "Both Owner And Spender is same");
+        require(from == owner , "Approver is not owner");
+         _tokenApprovals[tokenId] = spender;
+        approval[currentSeason][tokenId] = spender;
+        emit Approval(ownerOf(tokenId), spender, tokenId);
+    }
     
     function createToken(
         address playeraddress,
@@ -487,26 +497,22 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
             .cardtype;
 
         tokenOwners[currentSeason][tokenId] = to;
-        player[to][currentSeason][tokenId].cardtype = player[msg
-            .sender][currentSeason][tokenId]
-            .cardtype;
-        player[to][currentSeason][tokenId].value = player[msg
-            .sender][currentSeason][tokenId]
-            .value;
+        player[to][currentSeason][tokenId].cardtype = player[from][currentSeason][tokenId].cardtype;
+        player[to][currentSeason][tokenId].value = player[from][currentSeason][tokenId].value;
         playersTokenCount[to][currentSeason][token_type] += 1;
-        playersTokenCount[msg.sender][currentSeason][token_type] -= 1;
+        playersTokenCount[from][currentSeason][token_type] -= 1;
         for (
             uint256 i = 0;
-            i < ownToken[msg.sender][currentSeason].length;
+            i < ownToken[from][currentSeason].length;
             i++
         ) {
-            if (ownToken[msg.sender][currentSeason][i] == tokenId) {
-                ownToken[msg.sender][currentSeason][i] = 0;
+            if (ownToken[from][currentSeason][i] == tokenId) {
+                ownToken[from][currentSeason][i] = 0;
                 break;
             }
         }
         ownToken[to][currentSeason].push(tokenId);
-        delete (player[msg.sender][currentSeason][tokenId]);
+        delete (player[from][currentSeason][tokenId]);
 
         _beforeTokenTransfer(from, to, tokenId);
 
