@@ -230,7 +230,7 @@ interface erc20 {
         require(msg.value >= value); //check given value is greater or equal to token value
         
         nft.safeTransferFrom(seller,msg.sender, tokenid_);
-        nft.freeCardOrPurchased(msg.sender, tokenid_,0); // this will make that the card is purchased card
+        nft.freeCardOrPurchased(msg.sender, tokenid_,1); // this will make that the card is purchased card
         
         seller.transfer(msg.value);
         
