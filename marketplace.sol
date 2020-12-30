@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-
+pragma experimental ABIEncoderV2;
 pragma solidity >=0.4.23;
 interface NFT {
     
@@ -11,7 +11,8 @@ interface NFT {
 
     function transfer(address, uint256) external payable;
     
-    function freeCardOrPurchased(address , uint256, uint256) external returns(uint256);
+    function freeCardOrPurchased(address playerAddress, uint256 _tokenId , uint256 purchasedValue ,
+    string memory image_add,string memory ipfs_link,address sponsor) external ;
     
     function createToken(address,uint256,uint256) external payable returns (uint256);
     
@@ -38,6 +39,12 @@ interface erc20 {
     //address public escrow = 0x114dF342f9649f66E3e670bA29418b4693Fe3dA3;    
         
     address public owner_address;
+    
+    string rock_image;
+    
+    string paper_image;
+    
+    string scissor_image;
 
     uint256[] tokenid_added;
 
@@ -50,8 +57,8 @@ interface erc20 {
     uint256 totalPool;
 
     uint256 starsPrice;
-
-    uint256 tokenPrice;
+    
+    uint256 finite_game_commision = 5; //precentage commision of finite games
 
     mapping(uint256 => token_sell_information) public token_details;
 
@@ -61,10 +68,13 @@ interface erc20 {
     
     mapping(address => uint256) mappedPool;
     
+    mapping(uint256 => string)  imagetype;
+    
     struct token_sell_information {
         bool is_available;
         address buyer;
         address seller;
+        uint256 price;
     }
     
      struct stars_sell_information {
@@ -88,6 +98,9 @@ interface erc20 {
 
     constructor() public {
         owner_address = msg.sender;
+         imagetype[1] = rock_image;
+         imagetype[2] = paper_image;
+         imagetype[3] = scissor_image;
     }
 
     function setNftAddress(address _address) public onlyOwner {
@@ -105,11 +118,11 @@ interface erc20 {
         // this is rresponsible for setting the star price
         starsPrice = _price;
     }
-
-    function setNftPrice(uint256 _price) public onlyOwner {
-        // this is rresponsible for setting the nft price
-        tokenPrice = _price;
+    
+    function changeFiniteGamesCommision(uint256 new_commision) public onlyOwner {
+        finite_game_commision = new_commision;
     }
+
 
     function increaseStarSupply(uint256 value) public payable onlyOwner {
         
@@ -184,7 +197,7 @@ interface erc20 {
     }
 
     function decreaseTokenSupply(uint256 tokenId) public payable onlyOwner {
-       
+       require(nft.ownerOf(tokenId) == msg.sender,"seller is not owner");
         for(uint256 i=0; i<tokenid_added.length;i++){
             if(tokenid_added[i]==tokenId){
                 tokenid_added[i] = 0;
@@ -197,21 +210,40 @@ interface erc20 {
     
     
     
-    function sellCard(uint256 tokenid_) public {
+    function sellCard(uint256 tokenid_,uint256 amount) public {
         
         
         require(nft.ownerOf(tokenid_) == msg.sender,"seller is not owner");
         require(token_details[tokenid_].is_available == false,"token already in selling");
         require(bidderDetails[tokenid_].is_available == false,"This token is avaiable for bidding"); 
-        //transfer function should be called after this function
         nft.SellerApproveMarket(msg.sender,address(this),tokenid_);
         token_details[tokenid_].is_available = true;
         token_details[tokenid_].seller = msg.sender;
         token_details[tokenid_].buyer = address(0);
+        token_details[tokenid_].price = amount;
+        tokenid_added.push(tokenid_);
         available_token_count++;
         
     }
    
+     function revokeCard(uint256 tokenid_) public {
+        
+        
+        require(nft.ownerOf(tokenid_) == msg.sender,"seller is not owner");
+        require(token_details[tokenid_].is_available == true,"token is not avaiable for selling");
+        require(bidderDetails[tokenid_].is_available == false,"This token is avaiable for bidding"); 
+        //Seller gives Approval of token id to address(0)
+        nft.SellerApproveMarket(msg.sender,address(0),tokenid_);
+        delete token_details[tokenid_];
+        available_token_count--;
+        for(uint256 i = 0;i<tokenid_added.length;i++){
+            if(tokenid_added[i] == tokenid_){
+                tokenid_added[i] = 0;
+                break;
+            }
+        }
+        
+    }
    
     function buyCard(address payable seller,uint256 tokenid_) public payable {        
         
@@ -225,14 +257,19 @@ interface erc20 {
         
         uint256 token_type;
         uint256 value;
+        address payable finite_owner = payable(owner_address);
+        
         
         (token_type, value) = nft.tokenDetails(tokenid_);
-        require(msg.value >= value); //check given value is greater or equal to token value
+        require(msg.value >= token_details[tokenid_].price); //check given value is greater or equal to token value
         
         nft.safeTransferFrom(seller,msg.sender, tokenid_);
-        nft.freeCardOrPurchased(msg.sender, tokenid_,1); // this will make that the card is purchased card
+        nft.freeCardOrPurchased(msg.sender, tokenid_,1, imagetype[token_type],"",address(0)); // this will make that the card is purchased card
         
-        seller.transfer(msg.value);
+        uint temp_commision = (finite_game_commision * (msg.value))/100;
+        
+        finite_owner.transfer(temp_commision);
+        seller.transfer(msg.value - temp_commision);
         
         token_details[tokenid_].is_available = false;
         token_details[tokenid_].buyer = msg.sender;
@@ -247,13 +284,16 @@ interface erc20 {
     }
     
     
-    function showAvailableToken() public view returns (uint256[] memory available){
+    function showAvailableTokenForSelling() public view returns (string[] memory available){
         // returns the array of token present in marketplace
-        uint256[] memory available_token_for_sell = new uint256[](available_token_count);
+        string[] memory available_token_for_sell = new string[](available_token_count);
         uint256 j;
+        uint256 token_type;
+        uint256 value;
         for (uint256 i = 0; i < tokenid_added.length; i++) {
             if (token_details[tokenid_added[i]].is_available == true) {
-                available_token_for_sell[j] = tokenid_added[i];
+                (token_type, value) = nft.tokenDetails(tokenid_added[i]);
+                available_token_for_sell[j] = string(abi.encodePacked(tokenid_added[i],"@",token_type));
                 j++;
             }
         }
@@ -280,12 +320,28 @@ interface erc20 {
         return bidderDetails[tokenId].is_available;
     }
 
-    function closeBidding(uint256 tokenId, address bidderAddress, uint256 amountOfBidding) public {
+    function closeBidding(uint256 tokenId, address bidderAddress, uint256 amountOfBidding,
+                         string memory image_Add,string memory ipfs,address sponsor) public {
         address tokenOwner = nft.ownerOf(tokenId);
-        nft.safeTransferFrom(tokenOwner,bidderAddress,tokenId);
+        require(tokenOwner == msg.sender,"sender is not owner");
+        require(bidderDetails[tokenId].is_available == true,"token is not in bidding");
+        //nft.SellerApproveMarket(msg.sender,address(this),tokenId);
         bidderDetails[tokenId].is_available = false;
         bidderDetails[tokenId].owner = tokenOwner;
         bidderDetails[tokenId].bidder = bidderAddress;
         bidderDetails[tokenId].value = amountOfBidding;
+        nft.freeCardOrPurchased(msg.sender, tokenId,2,image_Add,ipfs,sponsor);
     }
+    
+    // function get_your_bidded_card(uint256 tokenId) public payable{
+    //     require(bidderDetails[tokenId].is_available == false,"token is in bidding");
+    //     require(msg.sender == bidderDetails[tokenId].bidder,"sender is not the bidder");
+    //     require(msg.value >= bidderDetails[tokenId].value,"insufficient fund");
+    //     address payable lister = payable(bidderDetails[tokenId].owner);
+    //     lister.transfer(msg.value);
+    //     nft.safeTransferFrom(lister,msg.sender, tokenId);
+    //     nft.freeCardOrPurchased(msg.sender, tokenId,2); // this will make that the card is bidded card
+        
+        
+    // }
 }
