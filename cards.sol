@@ -356,6 +356,8 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     function approve(address to, uint256 tokenId) public virtual override {
         address owner = ownerOf(tokenId);
         require(to != owner, "ERC721: approval to current owner");
+        require(_tokenApprovals[tokenId] == address(0));
+        require(approval[currentSeason][tokenId] == address(0));
 
         require(_msgSender() == owner || isApprovedForAll(owner, _msgSender()),
             "ERC721: approve caller is not owner nor approved for all"
