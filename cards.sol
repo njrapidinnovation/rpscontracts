@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 //import "../Strings.sol";
 import "../Context.sol";
@@ -11,29 +12,43 @@ import "../Address.sol";
 import "../EnumerableSet.sol";
 import "../EnumerableMap.sol";
 
+interface Finite_Games_MarketPlace {
+      struct token_sell_information {
+        bool is_available;
+        address buyer;
+        address seller;
+        uint256 price;
+    }
+    
+    struct biddingInformation {
+        bool is_available;
+        address owner;
+        address bidder;
+        uint256 value;
+    }
+    
+    function token_details(uint256) external returns(token_sell_information calldata);
+    
+    function bidderDetails(uint256) external returns(biddingInformation calldata);
+    
+}  
+
 contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     
     struct card {
         uint256 cardtype; //1: Rock , 2: Paper, 3 : Scissors
         uint256 value;
-        uint256 free; //0 for free 1 for purchased
+        uint256 free; //0 for free 1 for purchased 2 for bidded
+        string image_address;
+        string ipfs_contract_link;
+        address sponsor;
     }
-    
-    //using SafeMath for uint256;
+   
     using Address for address;
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableMap for EnumerableMap.UintToAddressMap;
-    //using Strings for uint256;
-    
-    uint256 _id = 1;
 
-   
-    // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
-    // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
-    bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
-    
-    
-    
+
     /*----------------------MAPPINGS START----------------------------*/
 
     // Mapping from holder address to their (enumerable) set of owned tokens
@@ -102,6 +117,10 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     //deploed address of market contract
     address marketAddress;
     
+    //MarketPlace interface address
+    Finite_Games_MarketPlace finite_Address;
+    
+    //Store tokenIds with their owners
     EnumerableMap.UintToAddressMap private _tokenOwners;
     
     //set supply of each token
@@ -109,6 +128,8 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     
     // Base URI
     string private _baseURI;
+    
+    bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
 
     bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
 
@@ -141,6 +162,7 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     function setMarketAddress(address _address) public payable {
         require(msg.sender == contractowner);
         marketAddress = _address;
+        finite_Address = Finite_Games_MarketPlace(_address);
     }
 
     function changeSeason(uint256 _supply) public payable onlyOwner {
@@ -374,7 +396,8 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     function transferFrom(address from, address to, uint256 tokenId) public virtual override {
         //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
-
+        require(finite_Address.token_details(tokenId).is_available == false,"token is in selling");
+        require(finite_Address.bidderDetails(tokenId).is_available == false,"token is in bidding");
         _transfer(from, to, tokenId);
     }
 
@@ -385,33 +408,12 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         safeTransferFrom(from, to, tokenId, "");
     }
 
-    /**
-     * @dev See {IERC721-safeTransferFrom}.
-     */
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public virtual override {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
         require(approval[currentSeason][tokenId] == msg.sender);
         _safeTransfer(from, to, tokenId, _data);
     }
 
-    /**
-     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
-     * are aware of the ERC721 protocol to prevent tokens from being forever locked.
-     *
-     * `_data` is additional data, it has no specified format and it is sent in call to `to`.
-     *
-     * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.
-     * implement alternative mechanisms to perform token transfer, such as signature-based.
-     *
-     * Requirements:
-     *
-     * - `from` cannot be the zero address.
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must exist and be owned by `from`.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual {
         _transfer(from, to, tokenId);
         require(_checkOnERC721Received(from, to, tokenId, _data), "ERC721: transfer to non ERC721Receiver implementer");
@@ -490,7 +492,7 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     function _transfer(address from, address to, uint256 tokenId) internal virtual {
         require(ownerOf(tokenId) == from, "ERC721: transfer of token that is not own");
         require(to != address(0), "ERC721: transfer to the zero address");
-         
+    
          address token_address = ownerOf(tokenId);
         
          uint256 token_type = player[token_address][currentSeason][tokenId]
@@ -602,10 +604,20 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         return currentSeason;
     }
     
-    function freeCardOrPurchased(address playerAddress, uint256 _tokenId , uint256 purchasedValue) public returns(uint256){ // function to change the value of card from free card to purchsed card
-     // this will be called from marketplace only as then it would become purchased card
-        uint256 value = player[playerAddress][currentSeason][_tokenId].free=purchasedValue;
-        return value;
+    function freeCardOrPurchased(address playerAddress, uint256 _tokenId , uint256 purchasedValue ,
+    string memory image_add,string memory ipfs_link,address sponsor) public { // function to change the value of card from free card to purchsed card
+     // this will be called from marketplace only as then it would become purchased card or a bidded card
+     if(purchasedValue == 2){
+         player[playerAddress][currentSeason][_tokenId].free=purchasedValue;
+         player[playerAddress][currentSeason][_tokenId].image_address = image_add;
+         player[playerAddress][currentSeason][_tokenId].ipfs_contract_link = ipfs_link;
+         player[playerAddress][currentSeason][_tokenId].sponsor = sponsor;
+     }
+     else{
+         player[playerAddress][currentSeason][_tokenId].free=purchasedValue;
+         player[playerAddress][currentSeason][_tokenId].image_address = image_add;
+     }
+
     }
     
     function unminted_tokens() public view returns(uint256){
