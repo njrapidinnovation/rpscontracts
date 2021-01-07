@@ -183,7 +183,7 @@ interface NFT {
         for (uint256 i = 0; i < tokenid_added.length; i++) {
             if (token_details[tokenid_added[i]].is_available == true) {
                 (token_type, value) = nft.tokenDetails(tokenid_added[i]);
-                available_token_for_sell[j] = string(abi.encodePacked(tokenid_added[i].uinttoString(),"@",token_type.uinttoString()));
+                available_token_for_sell[j] = string(abi.encodePacked(tokenid_added[i].uinttoString(),"@",token_type.uinttoString(),"@",(token_details[i].seller).toString()));
                 j++;
             }
         }
