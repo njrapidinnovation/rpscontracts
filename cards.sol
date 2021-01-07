@@ -626,6 +626,11 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     }
     
     function countMakeUp(address playeraddress) public payable{
+        require(
+            msg.sender == contractowner ||
+            msg.sender == gameContractAddress ||
+            msg.sender == marketAddress
+        );
         uint256 count1 = returnTokenCount(playeraddress, 1,false); // count of Rock available
         uint256 count2 = returnTokenCount(playeraddress, 2,false); // count of Paper available
         uint256 count3 = returnTokenCount(playeraddress, 3,false); // count of Scissors available
