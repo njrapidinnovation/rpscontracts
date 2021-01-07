@@ -2,7 +2,6 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-//import "../Strings.sol";
 import "../Context.sol";
 import "../IERC721Metadata.sol";
 import "../IERC721Enumerable.sol";
@@ -631,20 +630,20 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
         uint256 count2 = returnTokenCount(playeraddress, 2,false); // count of Paper available
         uint256 count3 = returnTokenCount(playeraddress, 3,false); // count of Scissors available
         for(uint256 k=0 ; k < 3 ; k++){
-            if( count1 < 20 && k == 0){
-                count1 = 20 - count1;
+            if( count1 < 10 && k == 0){
+                count1 = 10 - count1;
                 for(uint256 i=0; i< count1 ; i++){
                     createToken(playeraddress,1,20); // this will make the count of the Rock to 20 
                 }
             }
-            if( count2 < 20 && k == 1){
-                count2 = 20 - count2;
+            if( count2 < 10 && k == 1){
+                count2 = 10 - count2;
                 for(uint256 j=0; j< count2 ; j++){
                     createToken(playeraddress,2,20); // this will make the count of the Paper to 20 
                 }
             }
-            if( count3 < 20 && k == 2){
-                count3 = 20 - count3;
+            if( count3 < 10 && k == 2){
+                count3 = 10 - count3;
                 for(uint256 m=0; m< count1 ; m++){
                     createToken(playeraddress,3,20); // this will make the count of the Scissors to 20 
                 }
