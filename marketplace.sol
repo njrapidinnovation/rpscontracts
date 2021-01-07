@@ -19,54 +19,32 @@ interface NFT {
     function SellerApproveMarket(address from , address spender , uint256 tokenId) external;
 }
 
-interface erc20 {
-    function transfer(address, uint256) external view returns (bool);
-
-    function balanceOf(address) external view returns (uint256);
-
-    function transferFrom(address,address,uint256) external payable returns (bool);
-    
-    function Seller_Approve_Market(address from , address spender ,uint256 _value) external payable ; 
-}
-
 
  contract MarketPlace {
     
-    erc20 public stars;
-
     NFT public nft;
     
-    //address public escrow = 0x114dF342f9649f66E3e670bA29418b4693Fe3dA3;    
-        
+    using Strings for *;
+    
     address public owner_address;
     
-    string rock_image;
+    string rock_image;  //address of image rock token
     
-    string paper_image;
+    string paper_image;  // address of image of paper token
     
-    string scissor_image;
+    string scissor_image; //address of image of scissor token
 
-    uint256[] tokenid_added;
+    uint256[] tokenid_added;  //this array stores the token id which are availaible to sell ownership rights
 
-    uint256 public available_token_count;
-
-    uint256 public totalAmount; //amount to be send by escrow to the seller of stars.
-
-    uint256 public available_star_count;
-
-    uint256 totalPool;
-
-    uint256 starsPrice;
+    uint256 public available_token_count; //count of avaiable token for selling its ownership rights
+    
+    uint256 constant marketTokenPrice = 500; //token price of each token purchase from marketplace
     
     uint256 finite_game_commision = 5; //precentage commision of finite games
 
     mapping(uint256 => token_sell_information) public token_details;
-
-    mapping(address => stars_sell_information) public star_details;
     
     mapping(uint256 => biddingInformation) public bidderDetails;
-    
-    mapping(address => uint256) mappedPool;
     
     mapping(uint256 => string)  imagetype;
     
@@ -76,19 +54,16 @@ interface erc20 {
         address seller;
         uint256 price;
     }
-    
-     struct stars_sell_information {
-        bool is_available;
-        uint256 quantity_availaible;
-    }
 
     struct biddingInformation {
         bool is_available;
         address owner;
-        address bidder;
-        uint256 value;
+        address[] bidder;
+        uint256 max_bid;
+        uint256 reserve_price;
+        address bid_winner;
+        bool auction_stage; //true for complete false for running or not started
     }
-
 
 
     modifier onlyOwner {
@@ -98,9 +73,9 @@ interface erc20 {
 
     constructor() public {
         owner_address = msg.sender;
-         imagetype[1] = rock_image;
-         imagetype[2] = paper_image;
-         imagetype[3] = scissor_image;
+        imagetype[1] = rock_image;
+        imagetype[2] = paper_image;
+        imagetype[3] = scissor_image;
     }
 
     function setNftAddress(address _address) public onlyOwner {
@@ -108,115 +83,30 @@ interface erc20 {
         nft = NFT(_address);
     }
 
-    function setErc20Address(address ___address) public onlyOwner {
-        // set ERC20 address
-        stars = erc20(___address);
-    }
 
-    
-    function setStarsPrice(uint256 _price) public onlyOwner {
-        // this is rresponsible for setting the star price
-        starsPrice = _price;
-    }
-    
     function changeFiniteGamesCommision(uint256 new_commision) public onlyOwner {
         finite_game_commision = new_commision;
     }
 
-
-    function increaseStarSupply(uint256 value) public payable onlyOwner {
+    function buyCardFromAdmin(uint token_type) public payable {        
         
-        stars.Seller_Approve_Market(msg.sender,address(this),value);
-        available_star_count = available_star_count + value;
-        totalPool = totalPool + value;
-        mappedPool[msg.sender] += value;
-        star_details[msg.sender].is_available = true;
-        star_details[msg.sender].quantity_availaible += value;
-    }
-
-    function decreaseStarSupply(uint256 value) public onlyOwner {                  //////only escrow account can call..
-        // only admin will call this function. function is responsible for decrease stars count in market place
+        require(token_type == 1 || token_type == 2 || token_type == 3);
+        uint256 tokenid = nft.createToken(owner_address,token_type,100);
+        nft.SellerApproveMarket(owner_address,address(this),tokenid);
+        require(msg.value >= marketTokenPrice); //check given value is greater or equal to token value
+        nft.safeTransferFrom(owner_address,msg.sender, tokenid);
+        nft.freeCardOrPurchased(msg.sender, tokenid,1, imagetype[token_type],"",address(0)); // this will make that the card is purchased card
+        payable(owner_address).transfer(msg.value);
         
-        available_star_count = available_star_count - value;
-        totalPool = totalPool - value;
-        mappedPool[msg.sender] -= value;
-        if(value == star_details[msg.sender].quantity_availaible){
-        delete star_details[msg.sender];
-        }
-        else{
-        star_details[msg.sender].quantity_availaible -= value;
-        }
     }
 
     
-    function sellStars(uint256 count) public {
-        require(stars.balanceOf(msg.sender) >= count);
-        stars.Seller_Approve_Market(msg.sender,address(this),count);
-        mappedPool[msg.sender] += count;
-        star_details[msg.sender].is_available = true;
-        star_details[msg.sender].quantity_availaible += count;
-        totalPool = totalPool + count;
-    }
-   
-   
-    function buyStars(address payable seller,uint256 amount) public payable {             
-        // this will be call by player who want to buy stars
-        require(amount <= mappedPool[seller]);
-        require(msg.value >= amount * starsPrice);
-        stars.transferFrom(seller,msg.sender, amount);
-        seller.transfer(msg.value);
-        totalPool = totalPool - amount;
-        if (amount == mappedPool[seller]) {
-            delete (mappedPool[seller]);
-            delete star_details[seller];
-        } else {
-            mappedPool[seller] -= amount;
-            star_details[seller].quantity_availaible -= amount;
-        }
-    }
-    
-    function showTotalPool() public view returns (uint256) {
-        // this will show the total pool size i.e stars available
-        return totalPool;
-    }
-    
-    
-    
-    
-    function increaseTokenSupply(uint256 cardType, uint256 value) public payable onlyOwner
-    {
-        
-        uint256 tokenid = nft.createToken(msg.sender, cardType, value);
-        tokenid_added.push(tokenid);
-        nft.SellerApproveMarket(msg.sender,address(this),tokenid);
-        token_details[tokenid].is_available = true;
-        token_details[tokenid].buyer = address(0);
-        token_details[tokenid].seller = msg.sender;
-        available_token_count++;
-    
-    }
-
-    function decreaseTokenSupply(uint256 tokenId) public payable onlyOwner {
-       require(nft.ownerOf(tokenId) == msg.sender,"seller is not owner");
-        for(uint256 i=0; i<tokenid_added.length;i++){
-            if(tokenid_added[i]==tokenId){
-                tokenid_added[i] = 0;
-                break;
-            }
-        }
-        delete token_details[tokenId];
-        available_token_count--;
-    }
-    
-    
-    
-    function sellCard(uint256 tokenid_,uint256 amount) public {
-        
+    //Fixed Auction to sell card OwnerShip Rights
+    function sell_Card_Ownership_At_FixedAmount(uint256 tokenid_,uint256 amount) public {
         
         require(nft.ownerOf(tokenid_) == msg.sender,"seller is not owner");
         require(token_details[tokenid_].is_available == false,"token already in selling");
         require(bidderDetails[tokenid_].is_available == false,"This token is avaiable for bidding"); 
-        nft.SellerApproveMarket(msg.sender,address(this),tokenid_);
         token_details[tokenid_].is_available = true;
         token_details[tokenid_].seller = msg.sender;
         token_details[tokenid_].buyer = address(0);
@@ -226,14 +116,13 @@ interface erc20 {
         
     }
    
-     function revokeCard(uint256 tokenid_) public {
+     //revoke card from fixed auction for Owner Rights
+     function revokeCard(uint256 tokenid_) public payable {
         
         
         require(nft.ownerOf(tokenid_) == msg.sender,"seller is not owner");
         require(token_details[tokenid_].is_available == true,"token is not avaiable for selling");
         require(bidderDetails[tokenid_].is_available == false,"This token is avaiable for bidding"); 
-        //Seller gives Approval of token id to address(0)
-        nft.SellerApproveMarket(msg.sender,address(0),tokenid_);
         delete token_details[tokenid_];
         available_token_count--;
         for(uint256 i = 0;i<tokenid_added.length;i++){
@@ -245,15 +134,15 @@ interface erc20 {
         
     }
    
-    function buyCard(address payable seller,uint256 tokenid_) public payable {        
+    function buy_Card_Ownership(address payable seller,uint256 tokenid_,string memory ipfs_ownership_link) public payable {        
         
         
         address owner = nft.ownerOf(tokenid_);
-        require(token_details[tokenid_].is_available == true,"token id not availaible for sell");
+        require(token_details[tokenid_].is_available == true,"token id not availaible for selling Ownership Rights");
         require(token_details[tokenid_].seller == seller,"provided seller is not seller of this token id");
         require(token_details[tokenid_].buyer == address(0),"card already purchased");
         require(owner == token_details[tokenid_].seller,"The person does not own this token"); 
-        require(bidderDetails[tokenid_].is_available != true,"This token is avaiable for bidding"); 
+        require(bidderDetails[tokenid_].is_available == false,"This token is avaiable for bidding"); 
         
         uint256 token_type;
         uint256 value;
@@ -263,8 +152,7 @@ interface erc20 {
         (token_type, value) = nft.tokenDetails(tokenid_);
         require(msg.value >= token_details[tokenid_].price); //check given value is greater or equal to token value
         
-        nft.safeTransferFrom(seller,msg.sender, tokenid_);
-        nft.freeCardOrPurchased(msg.sender, tokenid_,1, imagetype[token_type],"",address(0)); // this will make that the card is purchased card
+        nft.freeCardOrPurchased(owner, tokenid_,2, imagetype[token_type],ipfs_ownership_link,msg.sender); // this will make that the card is purchased card
         
         uint temp_commision = (finite_game_commision * (msg.value))/100;
         
@@ -284,7 +172,9 @@ interface erc20 {
     }
     
     
-    function showAvailableTokenForSelling() public view returns (string[] memory available){
+
+    
+    function show_Available_Token_For_Selling_OwnerShip() public view returns (string[] memory available){
         // returns the array of token present in marketplace
         string[] memory available_token_for_sell = new string[](available_token_count);
         uint256 j;
@@ -293,7 +183,7 @@ interface erc20 {
         for (uint256 i = 0; i < tokenid_added.length; i++) {
             if (token_details[tokenid_added[i]].is_available == true) {
                 (token_type, value) = nft.tokenDetails(tokenid_added[i]);
-                available_token_for_sell[j] = string(abi.encodePacked(tokenid_added[i],"@",token_type));
+                available_token_for_sell[j] = string(abi.encodePacked(tokenid_added[i].uinttoString(),"@",token_type.uinttoString()));
                 j++;
             }
         }
@@ -301,47 +191,158 @@ interface erc20 {
     }
 
 
-/*-----------------------------------------------Bidding Part-----------------------------------------------------*/
+/*-----------------------------------------------English Auction Part-----------------------------------------------------*/
 
 
 
-    function makeTokenAvailableForBidding(uint256 tokenId) public {
+    function makeTokenAvailableForEnglishAuction(uint256 tokenId,uint256 token_reserve_price) public {
         require(
             nft.ownerOf(tokenId) == msg.sender,
             "The token is not owned by the person"
         );
+        require(bidderDetails[tokenId].is_available == false);
         bidderDetails[tokenId].is_available = true;
         bidderDetails[tokenId].owner = nft.ownerOf(tokenId);
-        bidderDetails[tokenId].bidder = address(0);
-        bidderDetails[tokenId].value = 0;
+        bidderDetails[tokenId].reserve_price = token_reserve_price;
     }
     
-    function getBidStatus(uint256 tokenId) public view returns (bool) {
-        return bidderDetails[tokenId].is_available;
+    function getBidStatus(uint256 tokenId) public view returns (bool,address) {
+        return (bidderDetails[tokenId].is_available,bidderDetails[tokenId].bidder[bidderDetails[tokenId].bidder.length -1]);
+    }
+    
+    function bidOnToken(uint256 token_id,uint256 amount) public {
+        require(bidderDetails[token_id].is_available == true,"token not availaible for bidding");
+        require(amount>bidderDetails[token_id].reserve_price && amount > bidderDetails[token_id].max_bid);
+        bidderDetails[token_id].max_bid = amount;
+        bidderDetails[token_id].bidder.push(msg.sender);
     }
 
-    function closeBidding(uint256 tokenId, address bidderAddress, uint256 amountOfBidding,
-                         string memory image_Add,string memory ipfs,address sponsor) public {
+    function closeBidding(uint256 tokenId) public {
+        
         address tokenOwner = nft.ownerOf(tokenId);
         require(tokenOwner == msg.sender,"sender is not owner");
         require(bidderDetails[tokenId].is_available == true,"token is not in bidding");
         //nft.SellerApproveMarket(msg.sender,address(this),tokenId);
         bidderDetails[tokenId].is_available = false;
+        bidderDetails[tokenId].auction_stage = true;
         bidderDetails[tokenId].owner = tokenOwner;
-        bidderDetails[tokenId].bidder = bidderAddress;
-        bidderDetails[tokenId].value = amountOfBidding;
-        nft.freeCardOrPurchased(msg.sender, tokenId,2,image_Add,ipfs,sponsor);
+        bidderDetails[tokenId].bid_winner = bidderDetails[tokenId].bidder[bidderDetails[tokenId].bidder.length - 1];
+        nft.SellerApproveMarket(msg.sender,address(this),tokenId);
+        
     }
     
-    // function get_your_bidded_card(uint256 tokenId) public payable{
-    //     require(bidderDetails[tokenId].is_available == false,"token is in bidding");
-    //     require(msg.sender == bidderDetails[tokenId].bidder,"sender is not the bidder");
-    //     require(msg.value >= bidderDetails[tokenId].value,"insufficient fund");
-    //     address payable lister = payable(bidderDetails[tokenId].owner);
-    //     lister.transfer(msg.value);
-    //     nft.safeTransferFrom(lister,msg.sender, tokenId);
-    //     nft.freeCardOrPurchased(msg.sender, tokenId,2); // this will make that the card is bidded card
+    function getbidwinner(uint tokenid) public view returns(address){
+        require(bidderDetails[tokenid].auction_stage == true);
+        return bidderDetails[tokenid].bid_winner;
+    }
+    
+    function get_your_bidded_card(uint256 tokenId) public payable{
+        require(bidderDetails[tokenId].is_available == false,"token is in bidding");
+        require(msg.sender == bidderDetails[tokenId].bid_winner,"sender is not the bidder");
+        require(msg.value >= bidderDetails[tokenId].max_bid,"insufficient fund");
+        address payable seller = payable(bidderDetails[tokenId].owner);
+        uint256 token_type;
+        uint256 value;
+        (token_type, value) = nft.tokenDetails(tokenId);
+        address payable finite_owner = payable(owner_address);
+        nft.safeTransferFrom(seller,msg.sender, tokenId);
+        nft.freeCardOrPurchased(msg.sender, tokenId,2, imagetype[token_type],"",address(0)); // this will make that the card is purchased card
         
+        uint temp_commision = (finite_game_commision * (msg.value))/100;
         
-    // }
+        finite_owner.transfer(temp_commision);
+        seller.transfer(msg.value - temp_commision);
+        
+    }
+}
+
+library Strings {
+    /* @dev Converts a uint256 to its ASCII string representation.
+     */
+     
+     
+
+     
+function _toLower(string memory str) public pure returns (string memory) {
+        bytes memory bStr = bytes(str);
+        bytes memory bLower = new bytes(bStr.length);
+        for (uint i = 0; i < bStr.length; i++) {
+            // Uppercase character...
+            if ((uint8(bStr[i]) >= 65) && (uint8(bStr[i]) <= 90)) {
+                // So we add 32 to make it lowercase
+                bLower[i] = bytes1(uint8(bStr[i]) + 32);
+            } else {
+                bLower[i] = bStr[i];
+            }
+        }
+        return string(bLower);
+    }
+    function uinttoString(uint256 value) internal pure returns (string memory) {
+        // Inspired by OraclizeAPI's implementation - MIT licence
+        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        uint256 index = digits - 1;
+        temp = value;
+        while (temp != 0) {
+            buffer[index--] = byte(uint8(48 + temp % 10));
+            temp /= 10;
+        }
+        return string(buffer);
+    }
+     /*-------------------------To Compare two strings---------------------------*/
+    function compare(string memory  _a, string memory _b) internal pure returns (int) {
+        bytes memory a = bytes(_a);
+        bytes memory b = bytes(_b);
+        uint minLength = a.length;
+        if (b.length < minLength) minLength = b.length;
+        for (uint i = 0; i < minLength; i ++)
+            if (a[i] < b[i])
+                return -1;
+            else if (a[i] > b[i])
+                return 1;
+        if (a.length < b.length)
+            return -1;
+        else if (a.length > b.length)
+            return 1;
+        else
+            return 0;
+    }
+
+    function equal(string memory _a, string memory _b) internal pure returns (bool) {
+        return compare(_a, _b) == 0;
+    }
+   function toString(address account) public pure returns(string memory) {
+    return toString(abi.encodePacked(account));
+}
+
+function toString(uint256 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes32 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes memory data) public pure returns(string memory) {
+    bytes memory alphabet = "0123456789abcdef";
+
+    bytes memory str = new bytes(2 + data.length * 2);
+    str[0] = "0";
+    str[1] = "x";
+    for (uint i = 0; i < data.length; i++) {
+        str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+        str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+    }
+    return string(str);
+}
 }
