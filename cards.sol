@@ -2,14 +2,14 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "../Context.sol";
-import "../IERC721Metadata.sol";
-import "../IERC721Enumerable.sol";
-import "../IERC721Receiver.sol";
-import "../ERC165.sol";
-import "../Address.sol";
-import "../EnumerableSet.sol";
-import "../EnumerableMap.sol";
+import "../QuestCrypto/Context.sol";
+import "../QuestCrypto/IERC721Metadata.sol";
+import "../QuestCrypto/IERC721Enumerable.sol";
+import "../QuestCrypto/IERC721Receiver.sol";
+import "../QuestCrypto/ERC165.sol";
+import "../QuestCrypto/Address.sol";
+import "../QuestCrypto/EnumerableSet.sol";
+import "../QuestCrypto/EnumerableMap.sol";
 
 interface Finite_Games_MarketPlace {
       struct token_sell_information {
@@ -608,6 +608,7 @@ contract RPS is Context, ERC165, IERC721Metadata, IERC721Enumerable {
     function freeCardOrPurchased(address playerAddress, uint256 _tokenId , uint256 purchasedValue ,
     string memory image_add,string memory ipfs_link,address sponsor) public { // function to change the value of card from free card to purchsed card
      // this will be called from marketplace only as then it would become purchased card or a bidded card
+     require(msg.sender == marketAddress);
      if(purchasedValue == 2){
          player[playerAddress][currentSeason][_tokenId].free=purchasedValue;
          player[playerAddress][currentSeason][_tokenId].image_address = image_add;
